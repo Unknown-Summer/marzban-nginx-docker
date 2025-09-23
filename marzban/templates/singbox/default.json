@@ -7,22 +7,13 @@
         "servers": [
             {
                 "tag": "dns_proxy",
-                "address": "https://1.1.1.1/dns-query",
-                "address_resolver": "dns_direct",
-                "strategy": "prefer_ipv4",
-                "detour": "direct"
+                "type": "https",
+                "server": "1.1.1.1"
             },
             {
                 "tag": "dns_direct",
-                "address": "https://8.8.8.8/dns-query",
-                "strategy": "prefer_ipv4",
-                "detour": "direct"
-            }
-        ],
-        "rules": [
-            {
-                "outbound": "any",
-                "server": "dns_direct"
+                "type": "https",
+                "server": "8.8.8.8"
             }
         ],
         "independent_cache": true
@@ -40,7 +31,7 @@
     "outbounds": [
         {
             "type": "selector",
-            "tag": "Internet",
+            "tag": "proxy",
             "outbounds": null
         },
         {
@@ -52,7 +43,8 @@
         },
         {
             "type": "direct",
-            "tag": "direct"
+            "tag": "direct",
+            "domain_resolver": "dns_direct"
         }
     ],
     "route": {
@@ -105,7 +97,7 @@
                     "ChatGPT.exe",
                     "yt-dlp.exe"
                 ],
-                "outbound": "Internet"
+                "outbound": "proxy"
             }
         ],
         "rule_set": [
@@ -159,7 +151,11 @@
                 "download_detour": "direct"
             }
         ],
-        "auto_detect_interface": true
+        "auto_detect_interface": true,
+        "default_domain_resolver": {
+            "server": "dns_proxy",
+            "strategy": "ipv4_only"
+        }
     },
     "experimental": {
         "cache_file": {
