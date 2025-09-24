@@ -1,0 +1,287 @@
+mixed-port: 7890
+allow-lan: true
+tcp-concurrent: true
+enable-process: true
+find-process-mode: strict
+mode: rule
+log-level: info
+ipv6: false
+bind-address: "*"
+keep-alive-interval: 45
+unified-delay: false
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+tun:
+  enable: true
+  stack: mixed
+  dns-hijack:
+    - "0.0.0.0:53"
+#   - "198.18.0.2:53"
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: true
+
+dns:
+  enable: true
+  prefer-h3: false
+  use-hosts: true
+  use-system-hosts: true
+  listen: 127.0.0.1:6868
+  ipv6: false
+  enhanced-mode: redir-host
+  default-nameserver:
+    - tls://9.9.9.9
+    - tls://149.112.112.112
+  proxy-server-nameserver:
+    - tls://9.9.9.9
+    - tls://149.112.112.112
+  direct-nameserver:
+    - tls://77.88.8.8
+    - tls://unfiltered.dns.adguard-dns.com
+
+{{ conf | except("proxy-groups", "port", "mode") | yaml }}
+
+proxy-groups:
+- name: '♻️ Automatic'
+  type: 'url-test'
+  url: 'http://www.gstatic.com/generate_204'
+  interval: 300
+  proxies:
+  {{ proxy_remarks | yaml | indent(2) }}
+{{ conf.get("proxy-groups", []) | yaml }}
+
+rule-providers:
+  ru-inline-banned:
+    type: inline
+    payload:
+      - DOMAIN-SUFFIX,habr.com
+      - DOMAIN-SUFFIX,kemono.su
+      - DOMAIN-SUFFIX,jut.su
+      - DOMAIN-SUFFIX,kara.su
+      - DOMAIN-SUFFIX,theins.ru
+      - DOMAIN-SUFFIX,tvrain.ru
+      - DOMAIN-SUFFIX,echo.msk.ru
+      - DOMAIN-SUFFIX,the-village.ru
+      - DOMAIN-SUFFIX,snob.ru
+      - DOMAIN-SUFFIX,novayagazeta.ru
+      - DOMAIN-SUFFIX,moscowtimes.ru
+      - DOMAIN-KEYWORD,animego
+      - DOMAIN-KEYWORD,yummyanime
+      - DOMAIN-KEYWORD,yummy-anime
+      - DOMAIN-KEYWORD,animeportal
+      - DOMAIN-KEYWORD,anime-portal
+      - DOMAIN-KEYWORD,animedub
+      - DOMAIN-KEYWORD,anidub
+      - DOMAIN-KEYWORD,animelib
+      - DOMAIN-KEYWORD,ikianime
+      - DOMAIN-KEYWORD,anilibria
+    behavior: classical
+  ru-inline:
+    type: inline
+    payload:
+      - DOMAIN-SUFFIX,2ip.ru
+      - DOMAIN-SUFFIX,yastatic.net
+      - DOMAIN-SUFFIX,yandex.net
+      - DOMAIN-SUFFIX,yandex.kz
+      - DOMAIN-SUFFIX,yandex.com
+      - DOMAIN-SUFFIX,mycdn.me
+      - DOMAIN-SUFFIX,vk.com
+      - DOMAIN-SUFFIX,.ru
+      - DOMAIN-SUFFIX,.su
+      - DOMAIN-SUFFIX,.by
+      - DOMAIN-SUFFIX,.ru.com
+      - DOMAIN-SUFFIX,.ru.net
+      - DOMAIN-SUFFIX,kudago.com
+      - DOMAIN-SUFFIX,kinescope.io
+      - DOMAIN-SUFFIX,redheadsound.studio
+      - DOMAIN-SUFFIX,plplayer.online
+      - DOMAIN-SUFFIX,lomont.site
+      - DOMAIN-SUFFIX,remanga.org
+      - DOMAIN-SUFFIX,shopstory.live
+      - DOMAIN-KEYWORD,miradres
+      - DOMAIN-KEYWORD,premier
+      - DOMAIN-KEYWORD,shutterstock
+      - DOMAIN-KEYWORD,2gis
+      - DOMAIN-KEYWORD,diginetica
+      - DOMAIN-KEYWORD,kinescopecdn
+      - DOMAIN-KEYWORD,researchgate
+      - DOMAIN-KEYWORD,springer
+      - DOMAIN-KEYWORD,nextcloud
+      - DOMAIN-KEYWORD,kaspersky
+      - DOMAIN-KEYWORD,stepik
+      - DOMAIN-KEYWORD,likee
+      - DOMAIN-KEYWORD,snapchat
+      - DOMAIN-KEYWORD,yappy
+      - DOMAIN-KEYWORD,pikabu
+      - DOMAIN-KEYWORD,okko
+      - DOMAIN-KEYWORD,wink
+      - DOMAIN-KEYWORD,kion
+      - DOMAIN-KEYWORD,roblox
+      - DOMAIN-KEYWORD,ozon
+      - DOMAIN-KEYWORD,wildberries
+      - DOMAIN-KEYWORD,aliexpress
+    behavior: classical
+  geosite-ru:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/category-ru.mrs
+    path: ./provider/rule-set/geosite-ru.mrs
+    interval: 86400
+  geoip-ru:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geoip/ru.mrs
+    path: ./provider/rule-set/geoip-ru.mrs
+    interval: 86400
+  geoip-by:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geoip/by.mrs
+    path: ./provider/rule-set/geoip-by.mrs
+    interval: 86400
+  geosite-private:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/private.mrs
+    path: ./provider/rule-set/geosite-private.mrs
+    interval: 86400
+  geoip-private:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geoip/private.mrs
+    path: ./provider/rule-set/geoip-private.mrs
+    interval: 86400
+  discord_domains:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/discord.mrs
+    path: ./provider/rule-set/discord_domains.mrs
+    interval: 86400
+  discord_vc:
+    type: inline
+    payload:
+      - AND,((IP-CIDR,138.128.136.0/21),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,162.158.0.0/15),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,172.64.0.0/13),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,34.0.0.0/15),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,34.2.0.0/15),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,35.192.0.0/12),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,35.208.0.0/12),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,5.200.14.128/25),(NETWORK,udp),(DST-PORT,50000-51000))
+      - AND,((IP-CIDR,66.22.192.0/18),(NETWORK,udp),(DST-PORT,50000-51000))
+    behavior: classical
+  refilter_domains:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/re-filter/domain-rule.mrs
+    path: ./provider/rule-set/domain-rule.mrs
+    interval: 86400
+  refilter_ipsum:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/re-filter/ip-rule.mrs
+    path: ./provider/rule-set/ip-rule.mrs
+    interval: 86400
+  youtube:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/youtube.mrs
+    path: ./provider/rule-set/youtube.mrs
+  torrent-trackers:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/other/torrent-trackers.mrs
+    path: ./provider/rule-set/torrent-trackers.mrs
+    interval: 86400
+  torrent-clients:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/other/torrent-clients.yaml
+    path: ./provider/rule-set/torrent-clients.yaml
+    interval: 86400
+  ru-bundle:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/ru-bundle/rule.mrs
+    path: ./provider/rule-set/ru-bundle/rule.mrs
+    interval: 86400
+  openai:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/openai.mrs
+    path: ./provider/rule-set/openai.mrs
+    interval: 86400
+  gemini:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/google-gemini.mrs
+    path: ./provider/rule-set/gemini.mrs
+    interval: 86400
+  ai-bundle:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/category-ai-!cn.mrs
+    path: ./provider/rule-set/geo/geosite/category-ai-!cn.mrs
+    interval: 86400
+  twitch:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/twitch.mrs
+    path: ./provider/rule-set/geo/geosite/twitch.mrs
+    interval: 86400
+
+rules:
+  - AND,((NETWORK,udp),(DST-PORT,443)),REJECT
+  - AND,((NETWORK,udp),(DST-PORT,853)),REJECT
+  - OR,((DOMAIN,ads.twitch.tv),(DOMAIN,playlist.ttvnw.net)),DIRECT
+  - RULE-SET,twitch,DIRECT
+  - RULE-SET,geosite-private,DIRECT,no-resolve
+  - RULE-SET,geoip-private,DIRECT
+  - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-trackers)),DIRECT
+  - OR,((PROCESS-NAME,com.vkontakte.android),(PROCESS-NAME,ru.oneme.app)),DIRECT
+  - OR,((PROCESS-NAME,ru.kinopoisk),(PROCESS-NAME,ru.more.play),(PROCESS-NAME,ar.tvplayer.tv)),DIRECT
+  - OR,((PROCESS-NAME,localsend_app.exe),(PROCESS-NAME,org.localsend.localsend_app),(PROCESS-NAME,syncthingtray.exe),(PROCESS-NAME,syncthing.exe),(PROCESS-NAME,com.github.catfriend1.syncthingandroid)),DIRECT
+  - OR,((DOMAIN,steampowered.com),(DOMAIN,steamcommunity.com),(PROCESS-NAME,steamwebhelper.exe),(PROCESS-NAME,steam.exe),(PROCESS-NAME,steamservice.exe),(PROCESS-NAME,com.valvesoftware.android.steam.community),(PROCESS-NAME,cs2.exe),(PROCESS-NAME,dota2.exe),(PROCESS-NAME,Deadlock.exe),(PROCESS-NAME,left4dead2.exe),(PROCESS-NAME,gdota2.exe),(PROCESS-NAME,gameoverlayui.exe)),DIRECT
+  - OR,((DOMAIN,battle.net),(DOMAIN,blizzard-api.arkoselabs.com),(PROCESS-NAME,Battle.net.exe),(PROCESS-NAME,Overwatch.exe),(PROCESS-NAME,SC2_x64.exe),(PROCESS-NAME,BlizzardBrowser.exe),(PROCESS-NAME,WowVoiceProxy.exe),(PROCESS-NAME,Wow.exe),(PROCESS-NAME,Agent.exe)),DIRECT
+  - OR,((PROCESS-NAME,FortniteClient-Win64-Shipping.exe),(PROCESS-NAME,com.epicgames.fortnite),(PROCESS-NAME,EOSOverlayRenderer-Win64-Shipping.exe),(PROCESS-NAME,EpicOnlineServicesUserHelper.exe)),DIRECT
+  - OR,((DOMAIN,ea.com),(PROCESS-NAME,EADesktop.exe),(PROCESS-NAME,EACefSubProcess.exe),(PROCESS-NAME,EABackgroundService.exe),(PROCESS-NAME,EALocalHostSvc.exe),(PROCESS-NAME,EALink.exe),(PROCESS-NAME,TS4.exe),(PROCESS-NAME,TS4_x64.exe),(PROCESS-NAME,bf1.exe),(PROCESS-NAME,bfv.exe),(PROCESS-NAME,r5apex_dx12.exe),(PROCESS-NAME,Titanfall2.exe)),DIRECT
+  - OR,((DOMAIN,embark.games),(PROCESS-NAME,Discovery.exe),(PROCESS-NAME,Discovery-d.exe),(PROCESS-NAME,Discovery-e.exe)),DIRECT
+  - OR,((DOMAIN,neteasegames.com),(DOMAIN,marvelrivals.com),(PROCESS-NAME,marvel.exe),(PROCESS-NAME,MarvelRivals_Launcher.exe),(PROCESS-NAME,Marvel-Win64-Shipping.exe),(PROCESS-NAME,NarakaBladepoint.exe)),DIRECT
+  - OR,((DOMAIN,riotgames.com),(PROCESS-NAME,Riot Client.exe),(PROCESS-NAME,RiotClientServices.exe),(PROCESS-NAME,VALORANT-Win64-Shipping.exe)),DIRECT
+  - OR,((PROCESS-NAME,Deadbydaylight-win64-shipiing.exe),(PROCESS-NAME,DeadByDaylight.exe)),DIRECT
+  - OR,((DOMAIN,vrchat.com),(PROCESS-NAME,VRChat.exe)),DIRECT
+  - OR,((PROCESS-NAME,Warhammer 40000 Space Marine 2 - Retail.exe),(PROCESS-NAME,Warhammer 40000 Space Marine 2.exe),(PROCESS-NAME,helldivers2.exe),(PROCESS-NAME,DyingLightGame x64_rwdi.exe),(PROCESS-NAME,RoR2.exe),(PROCESS-NAME,javaw.exe)),DIRECT
+  - OR,((DOMAIN,ipwho.is),(DOMAIN,api.ip.sb),(DOMAIN,ipapi.co),(DOMAIN,ipinfo.io),(DOMAIN-SUFFIX,2ip.io),(DOMAIN-SUFFIX,2ipcore.com)),♻️ Automatic
+  - OR,((RULE-SET,discord_domains),(RULE-SET,discord_vc),(PROCESS-NAME,Discord.exe)),♻️ Automatic
+  - OR,((RULE-SET,ai-bundle),(RULE-SET,gemini),(RULE-SET,openai)),♻️ Automatic
+  - OR,((DOMAIN,vivox.com)),DIRECT
+  - RULE-SET,youtube,♻️ Automatic
+  - RULE-SET,ru-bundle,♻️ Automatic
+  - RULE-SET,refilter_domains,♻️ Automatic
+  - RULE-SET,refilter_ipsum,♻️ Automatic
+  - RULE-SET,ru-inline-banned,♻️ Automatic
+  - RULE-SET,ru-inline,DIRECT
+  - RULE-SET,geosite-ru,DIRECT
+  - RULE-SET,geoip-ru,DIRECT
+  - RULE-SET,geoip-by,DIRECT
+  - MATCH,♻️ Automatic
