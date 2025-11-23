@@ -84,13 +84,13 @@ install_package () {
     PACKAGE=$1
     colorized_echo blue "Installing $PACKAGE"
     if [[ "$OS" == "Ubuntu"* ]] || [[ "$OS" == "Debian"* ]]; then
-        $PKG_MANAGER -y install "$PACKAGE"
+        sudo $PKG_MANAGER -y install "$PACKAGE"
         elif [[ "$OS" == "CentOS"* ]] || [[ "$OS" == "AlmaLinux"* ]]; then
-        $PKG_MANAGER install -y "$PACKAGE"
+        sudo $PKG_MANAGER install -y "$PACKAGE"
         elif [ "$OS" == "Fedora"* ]; then
-        $PKG_MANAGER install -y "$PACKAGE"
+        sudo $PKG_MANAGER install -y "$PACKAGE"
         elif [ "$OS" == "Arch" ]; then
-        $PKG_MANAGER -S --noconfirm "$PACKAGE"
+        sudo $PKG_MANAGER -S --noconfirm "$PACKAGE"
     else
         colorized_echo red "Unsupported operating system"
         exit 1
