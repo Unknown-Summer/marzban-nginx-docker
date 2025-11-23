@@ -51,20 +51,20 @@ detect_and_update_package_manager() {
     colorized_echo blue "Updating package manager"
     if [[ "$OS" == "Ubuntu"* ]] || [[ "$OS" == "Debian"* ]]; then
         PKG_MANAGER="apt-get"
-        $PKG_MANAGER update
+        sudo $PKG_MANAGER update
         elif [[ "$OS" == "CentOS"* ]] || [[ "$OS" == "AlmaLinux"* ]]; then
         PKG_MANAGER="yum"
-        $PKG_MANAGER update -y
+        sudo $PKG_MANAGER update -y
         $PKG_MANAGER install -y epel-release
         elif [ "$OS" == "Fedora"* ]; then
         PKG_MANAGER="dnf"
-        $PKG_MANAGER update
+        sudo $PKG_MANAGER update
         elif [ "$OS" == "Arch" ]; then
         PKG_MANAGER="pacman"
-        $PKG_MANAGER -Sy
+        sudo $PKG_MANAGER -Sy
         elif [[ "$OS" == "openSUSE"* ]]; then
         PKG_MANAGER="zypper"
-        $PKG_MANAGER refresh
+        sudo $PKG_MANAGER refresh
     else
         colorized_echo red "Unsupported operating system"
         exit 1
